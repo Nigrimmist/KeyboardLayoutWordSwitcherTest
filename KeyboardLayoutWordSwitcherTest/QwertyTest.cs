@@ -34,13 +34,17 @@ namespace KeyboardLayoutWordSwitcherTest
             List<RunInfo> results = new List<RunInfo>();
             results.AddRange(RunTestForLangs(str, GetLangSet(2)));
 
-            DisplayResults(results, "2 языка");
+            DisplayResults(results, "2 langs. order : AVERAGE",info => info.AvElapsed);
+            DisplayResults(results, "2 langs. order : TOTAL", info => info.ElapsedSum);
             results.Clear();
             results.AddRange(RunTestForLangs(str, GetLangSet(10)));
-            DisplayResults(results, "10 языков");
+            DisplayResults(results, "10 languages. order : AVERAGE", info => info.AvElapsed);
+            DisplayResults(results, "10 languages. order : TOTAL", info => info.ElapsedSum);
             results.Clear();
             results.AddRange(RunTestForLangs(str, GetLangSet(30)));
-            DisplayResults(results, "30 языков");
+            DisplayResults(results, "30 languages. order : AVERAGE", info => info.AvElapsed);
+            DisplayResults(results, "30 languages. order : TOTAL", info => info.ElapsedSum);
+
             Console.ReadLine();
         }
 
