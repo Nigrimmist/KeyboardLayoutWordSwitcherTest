@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace KeyboardLayoutWordSwitcherTest
@@ -12,32 +13,29 @@ namespace KeyboardLayoutWordSwitcherTest
         #region Support methods
         private IEnumerable<RunInfo> RunTestForLangs(string str, Dictionary<Language, char[]> langs)
         {
-            Stopwatch sw = new Stopwatch();
-
             for (int i = 0; i < algs.Count; i++)
             {
                 var algorithm = algs[i];
                 algorithm.Init(langs);
 
-                List<TimeSpan> times = new List<TimeSpan>();
+                algorithm.Start(str, Language.l1);
+                var results = new List<List<string>>(1000);
+                var sw = Stopwatch.StartNew();
                 for (int j = 0; j < 100; j++)
                 {
-                    sw.Start();
                     var variants = algorithm.Start(str, Language.l1);
-                    sw.Stop();
-
-                    if (i == 0 && !variants.First().StartsWith(@"!/NtcN9")) Console.WriteLine("*Incorrect Algoritm behaviour(" + algorithm.AuthoredBy());
-                    times.Add(sw.Elapsed);
-                    sw.Reset();
+                    results.Add(variants);
+                    
                 }
+                sw.Stop();
+                if (!results[0].First().StartsWith(@"!/NtcN9"))
+                    Console.WriteLine("*Incorrect Algoritm behaviour(" + algorithm.AuthoredBy());
+                
 
-                double doubleAverageTicks = times.Average(timeSpan => timeSpan.Ticks);
-                double sum = times.Sum(t => t.Ticks);
                 yield return new RunInfo()
                 {
-                    AvElapsed = new TimeSpan((long)doubleAverageTicks),
                     TestName = algorithm.AuthoredBy(),
-                    ElapsedSum = new TimeSpan((long)sum),
+                    Elapsed = sw.Elapsed
                 };
             }
         }
@@ -58,13 +56,13 @@ namespace KeyboardLayoutWordSwitcherTest
         private void DisplayResults(List<RunInfo> infos, string caption, Func<RunInfo,TimeSpan> orderByFunc)
         {
             Console.WriteLine(caption );
-            Console.WriteLine("--------------------------------------------------");
-            Console.WriteLine("# |      AVERAGE     |       TOTAL      |     By");
-            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine("-----------------------------");
+            Console.WriteLine("# |       TOTAL      |     By");
+            Console.WriteLine("-----------------------------");
             int i = 0;
             foreach (RunInfo result in infos.OrderBy(orderByFunc))
             {
-                Console.WriteLine("{2} | {0} | {3} | {1}", result.AvElapsed, result.TestName, ++i,result.ElapsedSum);
+                Console.WriteLine("{1} | | {2} | {0}", result.TestName, ++i, result.Elapsed);
             }
             Console.WriteLine("--------------------------------------------------");
         }
@@ -116,8 +114,7 @@ namespace KeyboardLayoutWordSwitcherTest
     public class RunInfo
     {
         public string TestName { get; set; }
-        public TimeSpan AvElapsed { get; set; }
-        public TimeSpan ElapsedSum { get; set; }
+        public TimeSpan Elapsed { get; set; }
     }
 
     #endregion
