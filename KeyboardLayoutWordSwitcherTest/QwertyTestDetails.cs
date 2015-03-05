@@ -28,7 +28,7 @@ namespace KeyboardLayoutWordSwitcherTest
                     
                 }
                 sw.Stop();
-                if (!results[0].First().StartsWith(@"!/NtcN9"))
+                if (results[0] == null || results[0].Count == 0 || !results[0].First().StartsWith(@"!/NtcN9"))
                     Console.WriteLine("*Incorrect Algoritm behaviour(" + algorithm.AuthoredBy());
                 
 
