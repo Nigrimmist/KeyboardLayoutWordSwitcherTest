@@ -11,7 +11,8 @@ namespace KeyboardLayoutWordSwitcherTest
             new Nigrimmist(), 
             new DPleshakov(),
             new SMLL(), 
-            new Anime()
+            new Anime(),
+            new Yafimau()
         };
 
         private static Dictionary<Language, char[]> langSamples = new Dictionary<Language, char[]> {
