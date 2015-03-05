@@ -10,6 +10,7 @@ namespace KeyboardLayoutWordSwitcherTest.Algorithms
     {
         private List<LanguageLayout> normLanguages;
         private char[] langResult = new char[100000];
+        private char[] buffer = new char[100000];
 
         public void Init(Dictionary<Language, char[]> langs)
         {
@@ -42,16 +43,11 @@ namespace KeyboardLayoutWordSwitcherTest.Algorithms
 
             var words = value.Split(new[] { ' ' });
 
-            Dictionary<string, int> uniqueWords = GetUniqueWords(words);
+            var uniqueWords = GetUniqueWords(words);
 
-            List<int> encodedValue = new List<int>();
+            var encodedValue = EncodeWords(words, uniqueWords);
 
-            for (int i = 0; i < words.Length; i++)
-            {
-                encodedValue.Add(uniqueWords[words[i]]);
-            }
-
-            LanguageLayout currentLanguage = normLanguages.SingleOrDefault(l => l.Language == wordLanguage);
+            var currentLanguage = normLanguages.SingleOrDefault(l => l.Language == wordLanguage);
 
             foreach (var lang in normLanguages)
             {
@@ -60,23 +56,13 @@ namespace KeyboardLayoutWordSwitcherTest.Algorithms
                     continue;
                 }
 
-                List<string> wordsTranscripted = new List<string>(uniqueWords.Count);
+                var wordsTranscripted = new List<string>(uniqueWords.Count);
 
-                foreach (var word in uniqueWords.Keys)
+                foreach (var uniqueWord in uniqueWords.Keys)
                 {
-                    var s = new StringBuilder(word);
+                    CopyToBufferTranscriptedWord(uniqueWord, currentLanguage, lang);
 
-                    for (int i = 0; i < word.Length - 1; i++)
-                    {
-                        if (!currentLanguage.CharNum.ContainsKey(word[i]))
-                        {
-                            continue;
-                        }
-                        int j = currentLanguage.CharNum[word[i]];
-                        s.Replace(word[i], lang.NumChar[j]);
-                    }
-
-                    wordsTranscripted.Add(s.ToString());
+                    wordsTranscripted.Add(new string(buffer, 0, uniqueWord.Length));
                 }
 
                 int ci = 0;
@@ -93,6 +79,34 @@ namespace KeyboardLayoutWordSwitcherTest.Algorithms
 
             return result;
             //return new List<string>{@"!/NtcN9"};
+        }
+
+        private void CopyToBufferTranscriptedWord(string uniqueWord, LanguageLayout currentLanguage, LanguageLayout lang)
+        {
+            uniqueWord.CopyTo(0, buffer, 0, uniqueWord.Length);
+
+            for (int i = 0; i < uniqueWord.Length; i++)
+            {
+                if (!currentLanguage.CharNum.ContainsKey(uniqueWord[i]))
+                {
+                    continue;
+                }
+
+                var charIndexInCurrentLayout = currentLanguage.CharNum[uniqueWord[i]];
+
+                buffer[i] = lang.NumChar[charIndexInCurrentLayout];
+            }
+        }
+
+        private static List<int> EncodeWords(string[] words, Dictionary<string, int> uniqueWords)
+        {
+            List<int> encodedValue = new List<int>();
+
+            for (int i = 0; i < words.Length; i++)
+            {
+                encodedValue.Add(uniqueWords[words[i]]);
+            }
+            return encodedValue;
         }
 
         private static Dictionary<string, int> GetUniqueWords(string[] words)
